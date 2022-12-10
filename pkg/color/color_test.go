@@ -3,7 +3,7 @@ package color_test
 import (
 	"testing"
 
-	"github.com/johnfercher/maroto/pkg/color"
+	"github.com/farishadibrata/maroto/pkg/color"
 	"github.com/stretchr/testify/assert"
 )
 

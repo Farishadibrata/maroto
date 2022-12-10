@@ -5,9 +5,9 @@ import (
 	"os"
 	"time"
 
-	"github.com/johnfercher/maroto/pkg/consts"
-	"github.com/johnfercher/maroto/pkg/pdf"
-	"github.com/johnfercher/maroto/pkg/props"
+	"github.com/farishadibrata/maroto/pkg/consts"
+	"github.com/farishadibrata/maroto/pkg/pdf"
+	"github.com/farishadibrata/maroto/pkg/props"
 )
 
 func main() {

@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/farishadibrataata/maroto/internal"
-	"github.com/farishadibrataata/maroto/internal/mocks"
-	"github.com/farishadibrataata/maroto/pkg/color"
-	"github.com/farishadibrataata/maroto/pkg/consts"
+	"github.com/farishadibrata/maroto/internal"
+	"github.com/farishadibrata/maroto/internal/mocks"
+	"github.com/farishadibrata/maroto/pkg/color"
+	"github.com/farishadibrata/maroto/pkg/consts"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )

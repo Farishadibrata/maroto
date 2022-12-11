@@ -58,6 +58,23 @@ func (s *text) Add(text string, cell Cell, textProp props.Text) {
 			lineWidth := s.pdf.GetStringWidth(line)
 			_, _, fontSize := s.font.GetFont()
 			textHeight := fontSize / s.font.GetScaleFactor()
+			currentWordsIndex := 0
+
+			// Added justify function
+			if textProp.Align == consts.Justify {
+				words := strings.Split(line, " ")
+				if len(words) > 6 {
+					for lineWidth < cell.Width {
+						currentWordsIndex = currentWordsIndex + 1
+						if currentWordsIndex == len(words) {
+							currentWordsIndex = 0
+						}
+						words[currentWordsIndex] = words[currentWordsIndex] + " "
+						line = strings.Join(words, "")
+						lineWidth = s.pdf.GetStringWidth(line)
+					}
+				}
+			}
 
 			s.addLine(textProp, cell.X, cell.Width, cell.Y+float64(index)*textHeight+accumulateOffsetY, lineWidth, line)
 			accumulateOffsetY += textProp.VerticalPadding
@@ -112,6 +129,10 @@ func (s *text) getLines(words []string, colWidth float64) []string {
 func (s *text) addLine(textProp props.Text, xColOffset, colWidth, yColOffset, textWidth float64, text string) {
 	left, top, _, _ := s.pdf.GetMargins()
 
+	if textProp.Align == consts.Justify {
+		s.pdf.Text(xColOffset+left, yColOffset+top, text)
+		return
+	}
 	if textProp.Align == consts.Left {
 		s.pdf.Text(xColOffset+left, yColOffset+top, text)
 		return

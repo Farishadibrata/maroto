@@ -101,6 +101,7 @@ type TableListContent struct {
 	Size float64
 	// Color define the font color.
 	Color color.Color
+	Left  float64
 	// GridSizes is the custom properties of the size of the grid
 	// the sum of the values cannot be greater than 12, if this
 	// value is not provided the width of all columns will be the
@@ -118,10 +119,15 @@ type TableList struct {
 	ContentProp TableListContent
 	// Align is the align of the text (header and content) inside the columns.
 	Align consts.Align
+	Left  float64
 	// AlternatedBackground define the background color from even rows
 	// i.e rows with index (0, 2, 4, ..., N) will have background colorized,
 	// rows with index (1, 3, 5, ..., N) will not.
 	AlternatedBackground *color.Color
+	HeaderBackground     *color.Color
+	HeaderHeight         *int
+	DisableContent       bool
+	DisableHeader        bool
 	// HeaderContentSpace is the space between the header and the contents.
 	HeaderContentSpace float64
 	// VerticalContentPadding define the space between lines in content.
@@ -273,12 +279,13 @@ func (s *Font) ToTextProp(align consts.Align, top float64, extrapolate bool, ver
 }
 
 // ToTextProp from Font return a TableListContent based on Font.
-func (s *TableListContent) ToTextProp(align consts.Align, top float64, extrapolate bool, verticalPadding float64) Text {
+func (s *TableListContent) ToTextProp(align consts.Align, top float64, extrapolate bool, verticalPadding float64, Left float64) Text {
 	textProp := Text{
 		Family:          s.Family,
 		Style:           s.Style,
 		Size:            s.Size,
 		Align:           align,
+		Left:            Left,
 		Top:             top,
 		Extrapolate:     extrapolate,
 		VerticalPadding: verticalPadding,
@@ -302,7 +309,7 @@ func (s *TableList) MakeValid(header []string, defaultFamily string) {
 	}
 
 	if s.HeaderProp.Style == "" {
-		s.HeaderProp.Style = consts.Bold
+		s.HeaderProp.Style = consts.Normal
 	}
 
 	if len(s.HeaderProp.GridSizes) == 0 {

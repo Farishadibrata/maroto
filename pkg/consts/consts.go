@@ -26,6 +26,10 @@ type Align string
 const (
 	// Left represents a left horizontal align.
 	Left Align = "L"
+
+	// Right represents a right horizontal align.
+	Justify Align = "J"
+
 	// Right represents a right horizontal align.
 	Right Align = "R"
 	// Center represents a center horizontal and/or vertical align.

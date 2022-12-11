@@ -74,18 +74,27 @@ func (s *tableList) Create(header []string, contents [][]string, defaultFontFami
 
 	tableProp.MakeValid(header, defaultFontFamily)
 	headerHeight := s.calcLinesHeight(header, tableProp.HeaderProp, tableProp.Align)
-
+	if tableProp.HeaderHeight != nil {
+		headerHeight = headerHeight + float64(*tableProp.HeaderHeight)
+	}
 	// Draw header.
-	s.pdf.Row(headerHeight+1, func() {
-		for i, h := range header {
-			hs := h
+	if !tableProp.DisableHeader {
+		s.pdf.Row(headerHeight+1, func() {
+			for i, h := range header {
+				hs := h
 
-			s.pdf.Col(tableProp.HeaderProp.GridSizes[i], func() {
-				reason := hs
-				s.pdf.Text(reason, tableProp.HeaderProp.ToTextProp(tableProp.Align, 0, false, 0.0))
-			})
-		}
-	})
+				if tableProp.HeaderBackground != nil {
+					s.pdf.SetBackgroundColor(*tableProp.HeaderBackground)
+				}
+
+				s.pdf.Col(tableProp.HeaderProp.GridSizes[i], func() {
+					reason := hs
+					s.pdf.Text(reason, tableProp.HeaderProp.ToTextProp(tableProp.Align, 0, false, 0.0, tableProp.Left))
+				})
+				s.pdf.SetBackgroundColor(color.NewWhite())
+			}
+		})
+	}
 
 	// Define space between header and contents.
 	s.pdf.Row(tableProp.HeaderContentSpace, func() {
@@ -93,6 +102,9 @@ func (s *tableList) Create(header []string, contents [][]string, defaultFontFami
 	})
 
 	// Draw contents.
+	if tableProp.DisableContent {
+		return
+	}
 	for index, content := range contents {
 		contentHeight := s.calcLinesHeight(content, tableProp.ContentProp, tableProp.Align)
 		contentHeightPadded := contentHeight + tableProp.VerticalContentPadding
@@ -106,7 +118,7 @@ func (s *tableList) Create(header []string, contents [][]string, defaultFontFami
 				cs := c
 
 				s.pdf.Col(tableProp.ContentProp.GridSizes[i], func() {
-					s.pdf.Text(cs, tableProp.ContentProp.ToTextProp(tableProp.Align, tableProp.VerticalContentPadding/2.0, false, 0.0))
+					s.pdf.Text(cs, tableProp.ContentProp.ToTextProp(tableProp.Align, tableProp.VerticalContentPadding/2.0, false, 0.0, tableProp.Left))
 				})
 			}
 		})
@@ -128,7 +140,7 @@ func (s *tableList) calcLinesHeight(textList []string, contentProp props.TableLi
 	width, _ := s.pdf.GetPageSize()
 	usefulWidth := width - left - right
 
-	textProp := contentProp.ToTextProp(align, 0, false, 0.0)
+	textProp := contentProp.ToTextProp(align, 0, false, 0.0, 0)
 
 	for i, text := range textList {
 		gridSize := float64(contentProp.GridSizes[i])

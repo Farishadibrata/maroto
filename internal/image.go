@@ -4,11 +4,11 @@ import (
 	"bytes"
 	"encoding/base64"
 	"errors"
+	"math/rand"
 
 	"github.com/farishadibrata/maroto/internal/fpdf"
 	"github.com/farishadibrata/maroto/pkg/consts"
 	"github.com/farishadibrata/maroto/pkg/props"
-	"github.com/google/uuid"
 	"github.com/jung-kurt/gofpdf"
 )
 
@@ -31,6 +31,16 @@ func NewImage(pdf fpdf.Fpdf, math Math) *image {
 	}
 }
 
+const letterBytes = "ASD"
+
+func RandStringBytes(n int) string {
+	b := make([]byte, n)
+	for i := range b {
+		b[i] = letterBytes[rand.Intn(len(letterBytes))]
+	}
+	return string(b)
+}
+
 // AddFromFile open an image from disk and add to PDF.
 func (s *image) AddFromFile(path string, cell Cell, prop props.Rect) error {
 	info := s.pdf.RegisterImageOptions(path, gofpdf.ImageOptions{
@@ -48,12 +58,12 @@ func (s *image) AddFromFile(path string, cell Cell, prop props.Rect) error {
 
 // AddFromBase64 use a base64 string to add to PDF.
 func (s *image) AddFromBase64(stringBase64 string, cell Cell, prop props.Rect, extension consts.Extension) error {
-	imageID, _ := uuid.NewRandom()
-
+	//WARNING: Had to change from uuid to string because it caused an error in pdfcpu, for weird reason, i cant use random string.
+	imageID := "PLEASEREPLACEMEWHENYOUFIXEDIT"
 	ss, _ := base64.StdEncoding.DecodeString(stringBase64)
 
 	info := s.pdf.RegisterImageOptionsReader(
-		imageID.String(),
+		imageID,
 		gofpdf.ImageOptions{
 			ReadDpi:   false,
 			ImageType: string(extension),
@@ -65,7 +75,7 @@ func (s *image) AddFromBase64(stringBase64 string, cell Cell, prop props.Rect, e
 		return errors.New("could not register image options, maybe path/name is wrong")
 	}
 
-	s.addImageToPdf(imageID.String(), info, cell, prop)
+	s.addImageToPdf(imageID, info, cell, prop)
 	return nil
 }
 

@@ -36,6 +36,7 @@ type Maroto interface {
 
 	// Inside Col/Row Components
 	Text(text string, prop ...props.Text)
+	TextTOC(text string, pageNumber int, prop ...props.Text)
 	FileImage(filePathName string, prop ...props.Rect) (err error)
 	Base64Image(base64 string, extension consts.Extension, prop ...props.Rect) (err error)
 	Barcode(code string, prop ...props.Barcode) error
@@ -463,6 +464,49 @@ func (s *PdfMaroto) Text(text string, prop ...props.Text) {
 	}
 
 	s.TextHelper.Add(text, cell, textProp)
+}
+
+// Create Text For TOC
+func (s *PdfMaroto) TextTOC(text string, pageNumber int, prop ...props.Text) {
+	textProp := props.Text{
+		Color: color.Color{
+			Red:   0,
+			Green: 0,
+			Blue:  0,
+		},
+	}
+
+	if len(prop) > 0 {
+		textProp = prop[0]
+	}
+
+	textProp.MakeValid(s.defaultFontFamily)
+
+	if textProp.Top > s.rowHeight {
+		textProp.Top = s.rowHeight
+	}
+
+	if textProp.Left > s.colWidth {
+		textProp.Left = s.colWidth
+	}
+
+	if textProp.Right > s.colWidth {
+		textProp.Right = s.colWidth
+	}
+
+	cellWidth := s.colWidth - textProp.Left - textProp.Right
+	if cellWidth < 0 {
+		cellWidth = 0
+	}
+
+	cell := internal.Cell{
+		X:      s.xColOffset + textProp.Left,
+		Y:      s.offsetY + textProp.Top,
+		Width:  cellWidth,
+		Height: 0,
+	}
+
+	s.TextHelper.AddTOC(text, pageNumber, cell, textProp)
 }
 
 // FileImage add an Image reading from disk inside a cell.

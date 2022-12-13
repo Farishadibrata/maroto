@@ -3,6 +3,11 @@ package internal
 import (
 	"strings"
 
+	"fmt"
+
+	maths "math"
+	"strconv"
+
 	"github.com/farishadibrata/maroto/internal/fpdf"
 	"github.com/farishadibrata/maroto/pkg/consts"
 	"github.com/farishadibrata/maroto/pkg/props"
@@ -11,6 +16,7 @@ import (
 // Text is the abstraction which deals of how to add text inside PDF.
 type Text interface {
 	Add(text string, cell Cell, textProp props.Text)
+	AddTOC(text string, pageNumber int, cell Cell, textProp props.Text)
 	GetLinesQuantity(text string, fontFamily props.Text, colWidth float64) int
 }
 
@@ -80,6 +86,52 @@ func (s *text) Add(text string, cell Cell, textProp props.Text) {
 			accumulateOffsetY += textProp.VerticalPadding
 		}
 	}
+
+	s.font.SetColor(originalColor)
+}
+func round(num float64) int {
+	return int(num + maths.Copysign(0.5, num))
+}
+
+func toFixed(num float64, precision int) float64 {
+	output := maths.Pow(10, float64(precision))
+	return float64(round(num*output)) / output
+}
+
+func (s *text) AddTOC(text string, pageNumber int, cell Cell, textProp props.Text) {
+	s.font.SetFont(textProp.Family, textProp.Style, textProp.Size)
+
+	originalColor := s.font.GetColor()
+	s.font.SetColor(textProp.Color)
+
+	// duplicated
+	_, _, fontSize := s.font.GetFont()
+	fontHeight := fontSize / s.font.GetScaleFactor()
+
+	cell.Y += fontHeight
+
+	// Apply Unicode before calc spaces
+	unicodeText := s.textToUnicode(text, textProp)
+	stringWidth := s.pdf.GetStringWidth(unicodeText)
+	stringWidthNumbering := s.pdf.GetStringWidth(strconv.Itoa(pageNumber))
+	stringWidthDot := s.pdf.GetStringWidth(".")
+	accumulateOffsetY := 0.0
+
+	emptySpace := 0.0
+	emptySpace = toFixed((cell.Width-stringWidth-stringWidthNumbering)/stringWidthDot, 0)
+	// If should add one line
+
+	space := ""
+	// Create the format string for the table of contents
+	for i := 0; i < int(emptySpace); i++ {
+		space = space + "."
+	}
+
+	line := fmt.Sprintf("%s%s%d", text, space, pageNumber)
+	lineWidth := s.pdf.GetStringWidth(line)
+	textHeight := fontSize / s.font.GetScaleFactor()
+	s.addLine(textProp, cell.X, cell.Width, cell.Y+float64(1)*textHeight+accumulateOffsetY, lineWidth, line)
+	accumulateOffsetY += textProp.VerticalPadding
 
 	s.font.SetColor(originalColor)
 }

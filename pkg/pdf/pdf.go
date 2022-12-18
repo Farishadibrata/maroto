@@ -38,7 +38,7 @@ type Maroto interface {
 	Text(text string, prop ...props.Text)
 	TextTOC(text string, pageNumber int, prop ...props.Text)
 	FileImage(filePathName string, prop ...props.Rect) (err error)
-	Base64Image(base64 string, extension consts.Extension, prop ...props.Rect) (err error)
+	Base64Image(imageUrl string, base64 string, extension consts.Extension, prop ...props.Rect) (err error)
 	Barcode(code string, prop ...props.Barcode) error
 	QrCode(code string, prop ...props.Rect)
 	DataMatrixCode(code string, prop ...props.Rect)
@@ -531,7 +531,7 @@ func (s *PdfMaroto) FileImage(filePathName string, prop ...props.Rect) error {
 
 // Base64Image add an Image reading byte slices inside a cell.
 // Defining Image properties.
-func (s *PdfMaroto) Base64Image(base64 string, extension consts.Extension, prop ...props.Rect) error {
+func (s *PdfMaroto) Base64Image(imageUrl string, base64 string, extension consts.Extension, prop ...props.Rect) error {
 	rectProp := props.Rect{}
 	if len(prop) > 0 {
 		rectProp = prop[0]
@@ -546,7 +546,7 @@ func (s *PdfMaroto) Base64Image(base64 string, extension consts.Extension, prop 
 		Height: s.rowHeight,
 	}
 
-	return s.Image.AddFromBase64(base64, cell, rectProp, extension)
+	return s.Image.AddFromBase64(imageUrl, base64, cell, rectProp, extension)
 }
 
 // Barcode create an barcode inside a cell.

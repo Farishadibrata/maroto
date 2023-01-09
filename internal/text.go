@@ -69,7 +69,7 @@ func (s *text) Add(text string, cell Cell, textProp props.Text) {
 			// Added justify function
 			if textProp.Align == consts.Justify {
 				words := strings.Split(line, " ")
-				if len(words) > 6 {
+				if lineWidth > (cell.Width * 0.75) {
 					for lineWidth < cell.Width {
 						currentWordsIndex = currentWordsIndex + 1
 						if currentWordsIndex == len(words) {

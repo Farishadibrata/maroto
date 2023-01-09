@@ -28,6 +28,7 @@ type MarotoGridPart interface {
 
 	// Inside Col/Row Components.
 	Text(text string, prop ...props.Text)
+	GetCurrentPage() int
 }
 
 // TableList is the abstraction to create a table with header and contents.
@@ -37,9 +38,10 @@ type TableList interface {
 }
 
 type tableList struct {
-	pdf  MarotoGridPart
-	text Text
-	font Font
+	pdf           MarotoGridPart
+	text          Text
+	font          Font
+	lastPageIndex int
 }
 
 // NewTableList create a TableList.
@@ -71,6 +73,9 @@ func (s *tableList) Create(header []string, contents [][]string, defaultFontFami
 	if len(prop) > 0 {
 		tableProp = prop[0]
 	}
+	if tableProp.ShowHeaderOnNewPage != nil {
+		s.lastPageIndex = s.pdf.GetCurrentPage()
+	}
 
 	tableProp.MakeValid(header, defaultFontFamily)
 	headerHeight := s.calcLinesHeight(header, tableProp.HeaderProp, tableProp.Align)
@@ -79,7 +84,7 @@ func (s *tableList) Create(header []string, contents [][]string, defaultFontFami
 	}
 	// Draw header.
 	if !tableProp.DisableHeader {
-		s.pdf.Row(headerHeight+1, func() {
+		s.pdf.Row(headerHeight+0.5, func() {
 			for i, h := range header {
 				hs := h
 
@@ -106,6 +111,25 @@ func (s *tableList) Create(header []string, contents [][]string, defaultFontFami
 		return
 	}
 	for index, content := range contents {
+		if tableProp.ShowHeaderOnNewPage != nil {
+			currentPage := s.pdf.GetCurrentPage()
+			if s.lastPageIndex != currentPage {
+				// Draw header
+				tableProp.ShowHeaderOnNewPage()
+				// s.pdf.Row(headerHeight+1, func() {
+				// 	for i, h := range header {
+				// 		hs := h
+
+				// 		s.pdf.Col(tableProp.HeaderProp.GridSizes[i], func() {
+				// 			reason := hs
+				// 			s.pdf.Text(reason, tableProp.HeaderProp.ToTextProp(tableProp.Align, 0, false, 0.0, tableProp.Left))
+				// 		})
+				// 	}
+				// })
+				s.lastPageIndex = currentPage
+			}
+		}
+
 		contentHeight := s.calcLinesHeight(content, tableProp.ContentProp, tableProp.Align)
 		contentHeightPadded := contentHeight + tableProp.VerticalContentPadding
 
@@ -149,6 +173,10 @@ func (s *tableList) calcLinesHeight(textList []string, contentProp props.TableLi
 		qtdLines := float64(s.text.GetLinesQuantity(text, textProp, colWidth))
 		if qtdLines > maxLines {
 			maxLines = qtdLines
+		}
+		// Special Rule for overlap 4.2
+		if contentProp.Spacing != 0 {
+			maxLines = qtdLines + float64(contentProp.Spacing)
 		}
 	}
 

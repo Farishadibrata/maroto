@@ -50,11 +50,11 @@ type Maroto interface {
 
 	// Helpers
 	AddPage()
-	SetBorder(on bool)
+	SetBorder(border string)
 	SetBackgroundColor(color color.Color)
 	SetAliasNbPages(alias string)
 	SetFirstPageNb(number int)
-	GetBorder() bool
+	GetBorder() string
 	GetPageSize() (width float64, height float64)
 	GetCurrentPage() int
 	GetCurrentOffset() float64
@@ -103,7 +103,7 @@ type PdfMaroto struct {
 	marginTop         float64
 	calculationMode   bool
 	backgroundColor   color.Color
-	debugMode         bool
+	debugMode         string
 	orientation       consts.Orientation
 	pageSize          consts.PageSize
 	defaultFontFamily string
@@ -163,7 +163,7 @@ func NewMarotoCustomSize(orientation consts.Orientation, pageSize consts.PageSiz
 	maroto.Font.SetFamily(consts.Arial)
 	maroto.Font.SetStyle(consts.Bold)
 	maroto.Font.SetSize(defaultFontSize)
-	maroto.debugMode = false
+	maroto.debugMode = ""
 
 	maroto.Pdf.AddPage()
 
@@ -277,8 +277,8 @@ func (s *PdfMaroto) TableList(header []string, contents [][]string, prop ...prop
 
 // SetBorder enable the draw of lines in every cell.
 // Draw borders in all columns created.
-func (s *PdfMaroto) SetBorder(on bool) {
-	s.debugMode = on
+func (s *PdfMaroto) SetBorder(border string) {
+	s.debugMode = border
 }
 
 // SetBackgroundColor define the background color of the PDF.
@@ -307,7 +307,7 @@ func (s *PdfMaroto) SetCompression(compress bool) {
 }
 
 // GetBorder return the actual border value.
-func (s *PdfMaroto) GetBorder() bool {
+func (s *PdfMaroto) GetBorder() string {
 	return s.debugMode
 }
 
@@ -650,11 +650,7 @@ func (s *PdfMaroto) GetDefaultFontFamily() string {
 }
 
 func (s *PdfMaroto) createColSpace(actualWidthPerCol float64) {
-	border := ""
-
-	if s.debugMode {
-		border = "1"
-	}
+	border := s.debugMode
 
 	s.Pdf.CellFormat(actualWidthPerCol, s.rowHeight, "", border, 0, "C", !s.backgroundColor.IsWhite(), 0, "")
 }

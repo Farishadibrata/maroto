@@ -18,6 +18,8 @@ const (
 	ZapBats string = "zapfdingbats"
 	// Courier represents a courier Font.
 	Courier string = "courier"
+	// Times represents a times Font.
+	Times string = "times"
 )
 
 // Align is arRepresentation of a column align.

@@ -25,6 +25,8 @@ type Maroto interface {
 	Row(height float64, closure func())
 	Col(width uint, closure func())
 	ColSpace(gridSize uint)
+	CustomCol(width uint, closure func()) // Tambahan Ihsan
+	CustomColSpace(gridSize uint)         // Tambahan Ihsan
 
 	// Registers
 	RegisterHeader(closure func())
@@ -421,6 +423,24 @@ func (s *PdfMaroto) Col(width uint, closure func()) {
 // ColSpace create an empty column inside a row.
 func (s *PdfMaroto) ColSpace(gridSize uint) {
 	s.Col(gridSize, func() {})
+}
+
+// CustomCol is a col with custom width (Ihsan)
+func (s *PdfMaroto) CustomCol(width uint, closure func()) {
+	widthPerCol := float64(width)
+
+	s.colWidth = widthPerCol
+	s.createColSpace(widthPerCol)
+
+	// This closure has the components to be executed.
+	closure()
+
+	s.xColOffset += s.colWidth
+}
+
+// CustomColSpace create an empty column inside a row. (Ihsan)
+func (s *PdfMaroto) CustomColSpace(gridSize uint) {
+	s.CustomCol(gridSize, func() {})
 }
 
 // Text create a text inside a cell.

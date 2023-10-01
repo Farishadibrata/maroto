@@ -78,7 +78,7 @@ func (s *tableList) Create(header []string, contents [][]string, defaultFontFami
 	}
 
 	tableProp.MakeValid(header, defaultFontFamily)
-	headerHeight := s.calcLinesHeight(header, tableProp.HeaderProp, tableProp.Align)
+	headerHeight := s.calcLinesHeight(header, tableProp.HeaderProp, tableProp.Align, false)
 	if tableProp.HeaderHeight != nil {
 		headerHeight = headerHeight + float64(*tableProp.HeaderHeight)
 	}
@@ -130,7 +130,7 @@ func (s *tableList) Create(header []string, contents [][]string, defaultFontFami
 			}
 		}
 
-		contentHeight := s.calcLinesHeight(content, tableProp.ContentProp, tableProp.Align)
+		contentHeight := s.calcLinesHeight(content, tableProp.ContentProp, tableProp.Align, tableProp.TempFixOverlap)
 		contentHeightPadded := contentHeight + tableProp.VerticalContentPadding
 
 		if tableProp.AlternatedBackground != nil && index%2 == 0 {
@@ -157,7 +157,7 @@ func (s *tableList) Create(header []string, contents [][]string, defaultFontFami
 	}
 }
 
-func (s *tableList) calcLinesHeight(textList []string, contentProp props.TableListContent, align consts.Align) float64 {
+func (s *tableList) calcLinesHeight(textList []string, contentProp props.TableListContent, align consts.Align, TempFixOverlap bool) float64 {
 	maxLines := 1.0
 
 	left, _, right, _ := s.pdf.GetPageMargins()
@@ -177,6 +177,15 @@ func (s *tableList) calcLinesHeight(textList []string, contentProp props.TableLi
 		// Special Rule for overlap 4.2
 		if contentProp.Spacing != 0 {
 			maxLines = qtdLines + float64(contentProp.Spacing)
+		}
+
+		if TempFixOverlap && maxLines > 10 {
+			tempMaxLines := maxLines
+
+			for tempMaxLines > 3 {
+				tempMaxLines = tempMaxLines / 2
+			}
+			maxLines = maxLines + (tempMaxLines / 4)
 		}
 	}
 

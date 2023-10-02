@@ -140,6 +140,7 @@ type TableList struct {
 	LineProp            Line
 	ShowHeaderOnNewPage fn
 	// ShowHeaderOnNewPage bool
+	TempFixOverlap bool
 }
 
 // MakeValid from Rect will make the properties from a rectangle reliable to fit inside a cell

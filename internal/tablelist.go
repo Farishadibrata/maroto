@@ -78,7 +78,7 @@ func (s *tableList) Create(header []string, contents [][]string, defaultFontFami
 	}
 
 	tableProp.MakeValid(header, defaultFontFamily)
-	headerHeight := s.calcLinesHeight(header, tableProp.HeaderProp, tableProp.Align, false)
+	headerHeight := s.calcLinesHeight(header, tableProp.HeaderProp, tableProp.Align, false, tableProp.AlignByHeader)
 	if tableProp.HeaderHeight != nil {
 		headerHeight = headerHeight + float64(*tableProp.HeaderHeight)
 	}
@@ -130,7 +130,7 @@ func (s *tableList) Create(header []string, contents [][]string, defaultFontFami
 			}
 		}
 
-		contentHeight := s.calcLinesHeight(content, tableProp.ContentProp, tableProp.Align, tableProp.TempFixOverlap)
+		contentHeight := s.calcLinesHeight(content, tableProp.ContentProp, tableProp.Align, tableProp.TempFixOverlap, tableProp.AlignByHeader)
 		contentHeightPadded := contentHeight + tableProp.VerticalContentPadding
 
 		if tableProp.AlternatedBackground != nil && index%2 == 0 {
@@ -140,10 +140,15 @@ func (s *tableList) Create(header []string, contents [][]string, defaultFontFami
 		s.pdf.Row(contentHeightPadded+1, func() {
 			for i, c := range content {
 				cs := c
-
-				s.pdf.Col(tableProp.ContentProp.GridSizes[i], func() {
-					s.pdf.Text(cs, tableProp.ContentProp.ToTextProp(tableProp.Align, tableProp.VerticalContentPadding/2.0, false, 0.0, tableProp.Left))
-				})
+				if len(tableProp.AlignByHeader) > 0 {
+					s.pdf.Col(tableProp.ContentProp.GridSizes[i], func() {
+						s.pdf.Text(cs, tableProp.ContentProp.ToTextProp(tableProp.AlignByHeader[i], tableProp.VerticalContentPadding/2.0, false, 0.0, tableProp.Left))
+					})
+				} else {
+					s.pdf.Col(tableProp.ContentProp.GridSizes[i], func() {
+						s.pdf.Text(cs, tableProp.ContentProp.ToTextProp(tableProp.Align, tableProp.VerticalContentPadding/2.0, false, 0.0, tableProp.Left))
+					})
+				}
 			}
 		})
 
@@ -157,16 +162,19 @@ func (s *tableList) Create(header []string, contents [][]string, defaultFontFami
 	}
 }
 
-func (s *tableList) calcLinesHeight(textList []string, contentProp props.TableListContent, align consts.Align, TempFixOverlap bool) float64 {
+func (s *tableList) calcLinesHeight(textList []string, contentProp props.TableListContent, align consts.Align, TempFixOverlap bool, AlignByHeader []consts.Align) float64 {
 	maxLines := 1.0
 
 	left, _, right, _ := s.pdf.GetPageMargins()
 	width, _ := s.pdf.GetPageSize()
 	usefulWidth := width - left - right
-
 	textProp := contentProp.ToTextProp(align, 0, false, 0.0, 0)
 
 	for i, text := range textList {
+		if len(AlignByHeader) > 0 {
+			textProp = contentProp.ToTextProp(AlignByHeader[i], 0, false, 0.0, 0)
+		}
+
 		gridSize := float64(contentProp.GridSizes[i])
 		percentSize := gridSize / consts.MaxGridSum
 		colWidth := usefulWidth * percentSize

@@ -141,6 +141,8 @@ type TableList struct {
 	ShowHeaderOnNewPage fn
 	// ShowHeaderOnNewPage bool
 	TempFixOverlap bool
+	/// To align specificly based on header index
+	AlignByHeader []consts.Align
 }
 
 // MakeValid from Rect will make the properties from a rectangle reliable to fit inside a cell

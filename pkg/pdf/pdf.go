@@ -27,6 +27,7 @@ type Maroto interface {
 	ColSpace(gridSize uint)
 	CustomCol(width uint, closure func()) // Tambahan Ihsan
 	CustomColSpace(gridSize uint)         // Tambahan Ihsan
+	CustomColFloatWidth(width float64, closure func()) // Tambahan Daffa
 
 	// Registers
 	RegisterHeader(closure func())
@@ -403,6 +404,27 @@ func (s *PdfMaroto) Row(height float64, closure func()) {
 func (s *PdfMaroto) Col(width uint, closure func()) {
 	if width == 0 {
 		width = uint(consts.MaxGridSum)
+	}
+
+	percent := float64(width) / consts.MaxGridSum
+
+	pageWidth, _ := s.Pdf.GetPageSize()
+	left, _, right, _ := s.Pdf.GetMargins()
+	widthPerCol := (pageWidth - right - left) * percent
+
+	s.colWidth = widthPerCol
+	s.createColSpace(widthPerCol)
+
+	// This closure has the components to be executed.
+	closure()
+
+	s.xColOffset += s.colWidth
+}
+
+// ColFloatWidth is a col with custom float64 width (Daffa)
+func (s *PdfMaroto) CustomColFloatWidth(width float64, closure func()) {
+	if width == 0 {
+		width = float64(consts.MaxGridSum)
 	}
 
 	percent := float64(width) / consts.MaxGridSum

@@ -42,6 +42,7 @@ type tableList struct {
 	text          Text
 	font          Font
 	lastPageIndex int
+	addLinesText  float64
 }
 
 // NewTableList create a TableList.
@@ -73,6 +74,11 @@ func (s *tableList) Create(header []string, contents [][]string, defaultFontFami
 	if len(prop) > 0 {
 		tableProp = prop[0]
 	}
+
+	if tableProp.AddLinesText != 0 {
+		s.addLinesText = tableProp.AddLinesText
+	}
+
 	if tableProp.ShowHeaderOnNewPage != nil {
 		s.lastPageIndex = s.pdf.GetCurrentPage()
 	}
@@ -182,6 +188,11 @@ func (s *tableList) calcLinesHeight(textList []string, contentProp props.TableLi
 		if qtdLines > maxLines {
 			maxLines = qtdLines
 		}
+
+		if s.addLinesText != 0 {
+			maxLines = maxLines + s.addLinesText
+		}
+
 		// Special Rule for overlap 4.2
 		if contentProp.Spacing != 0 {
 			maxLines = qtdLines + float64(contentProp.Spacing)

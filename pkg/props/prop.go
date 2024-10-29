@@ -143,6 +143,7 @@ type TableList struct {
 	TempFixOverlap bool
 	/// To align specificly based on header index
 	AlignByHeader []consts.Align
+	AddLinesText  float64
 }
 
 // MakeValid from Rect will make the properties from a rectangle reliable to fit inside a cell
